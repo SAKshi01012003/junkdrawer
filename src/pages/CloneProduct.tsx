@@ -149,6 +149,7 @@ const CloneProduct = () => {
               </div>
             </div>
             
+    
             <div className="space-y-2">
               <label htmlFor="productName" className="text-sm font-medium">
                 Existing Product Name
