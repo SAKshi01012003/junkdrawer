@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 
 const organizations = [
   { id: 1, name: 'apigee-prod-ouax' },
@@ -17,6 +18,7 @@ const organizations = [
 const CloneProduct = () => {
   const [sourceOrg, setSourceOrg] = useState("");
   const [targetOrg, setTargetOrg] = useState("");
+  const [environments, setEnvironments] = useState('');
   const [formData, setFormData] = useState({
     sourceToken: '',
     targetToken: '',
@@ -34,7 +36,7 @@ const CloneProduct = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!sourceOrg || !targetOrg) {
@@ -47,17 +49,29 @@ const CloneProduct = () => {
       return;
     }
     
-    // Simulate API call
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Cloning product...',
-        success: 'Product successfully cloned!',
-        error: 'Failed to clone product',
+    try {
+      toast.error('reached before calling');
+      const response = await axios.post('http://localhost:5000/api/clone-product', {
+        sourceOrg,
+        targetOrg,
+        sourceToken: formData.sourceToken,
+        targetToken: formData.targetToken,
+        productName: formData.productName,
+        newProductName: formData.newProductName,
+        newDisplayName: formData.newDisplayName,
+        description: formData.description,
+        environments: environments.split(',').map(env => env.trim())
+      });
+
+      if (response.data.success) {
+        toast.success('Product successfully cloned!');
+      } else {
+        toast.error('Failed to clone product');
       }
-    );
-    
-    console.log('Form submitted:', { ...formData, sourceOrg, targetOrg });
+    } catch (error) {
+      console.error('Error cloning product:', error);
+      toast.error('Failed to clone product');
+    }
   };
 
   return (
@@ -92,7 +106,7 @@ const CloneProduct = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {organizations.map((org) => (
-                      <SelectItem key={org.id} value={org.id.toString()}>
+                      <SelectItem key={org.id} value={org.name}>
                         {org.name}
                       </SelectItem>
                     ))}
@@ -110,7 +124,7 @@ const CloneProduct = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {organizations.map((org) => (
-                      <SelectItem key={org.id} value={org.id.toString()}>
+                      <SelectItem key={org.id} value={org.name}>
                         {org.name}
                       </SelectItem>
                     ))}
@@ -207,6 +221,18 @@ const CloneProduct = () => {
                 className="min-h-[100px] transition-all duration-200 focus:ring-2 focus:ring-primary/20"
               />
             </div>
+            <div>
+          <label htmlFor="environments">Environments (comma-separated)</label>
+          <input
+            type="text"
+            id="environments"
+            name="environments"
+            value={environments}
+            onChange={(e) => setEnvironments(e.target.value)}
+            className="w-full p-2 border rounded"
+            placeholder="Enter environments (e.g., prod, test, dev)"
+          />
+        </div>
             
             <div className="pt-2">
               <Button 

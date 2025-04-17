@@ -37,6 +37,7 @@ const cloneProduct = async (req, res) => {
         message: 'Product not found in source organization' 
       });
     }
+    console.log("fetched--product-->", product);
 
     // Step 2: Modify product data for target organization
     const modifiedProduct = modifyProductForClone(product, {
@@ -47,12 +48,13 @@ const cloneProduct = async (req, res) => {
     });
 
     // Step 3: Create product in target organization
-    const createdProduct = await createProductInOrg(
-      targetOrg, 
-      modifiedProduct, 
-      targetToken
-    );
-
+    // const createdProduct = await createProductInOrg(
+    //   targetOrg, 
+    //   modifiedProduct, 
+    //   targetToken,
+    //   newProductName
+    // );
+console.log("to be posted---->>",modifiedProduct);
     return res.status(201).json({
       success: true,
       message: 'Product cloned successfully',
